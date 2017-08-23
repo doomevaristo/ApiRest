@@ -3,9 +3,11 @@ package com.marcosevaristo.rest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +25,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.marcosevaristo.business.CidadeAS;
 import com.marcosevaristo.model.CidadeEntity;
 import com.marcosevaristo.model.dto.EstadoDTO;
 import com.marcosevaristo.persistence.CidadeDAO;
@@ -188,9 +191,20 @@ public class CidadeService {
 			JsonObject json = (JsonObject) parse(jsonStr);
 			Long ibgeID = getValue(json, "ibge_id", Long.class);
 			if(ibgeID != null) {
-				CidadeEntity cidade = CidadeDAO.getInstance().recuperaCidadePorID(ibgeID);
-				if(cidade != null) {
-					response = response(RestResponseStatus.OK, converteCidadeEmJsonObject(cidade));
+				List<CidadeEntity> lCidades = CidadeDAO.getInstance().recuperaCidadePorID(ibgeID);
+				if(CollectionUtils.isNotEmpty(lCidades)) {
+					JsonArray cidadesArr = new JsonArray();
+					for(CidadeEntity umaCidadeEntity : lCidades) {
+						cidadesArr.add(converteCidadeEmJsonObject(umaCidadeEntity));
+					}
+					JsonObject jsonResponse = new JsonObject();
+					jsonResponse.add("cidades", cidadesArr);
+					
+					response = response(RestResponseStatus.OK, jsonResponse);
+				} else {
+					JsonObject jsonResponse = new JsonObject();
+					jsonResponse.add("cidade", null);
+					response = response(RestResponseStatus.FAIL, jsonResponse);
 				}
 			}
 		} catch (Exception e) {
@@ -319,7 +333,7 @@ public class CidadeService {
 						dadosArr.add(parse(umDado));
 					}
 					JsonObject jsonResponse = new JsonObject();
-					jsonResponse.add("cidades", cidadesArr);
+					jsonResponse.add("cidades", dadosArr);
 					
 					response = response(RestResponseStatus.OK, jsonResponse);
 				} else {
@@ -334,6 +348,38 @@ public class CidadeService {
 		JsonObject jsonResponse = new JsonObject();
 		jsonResponse.add("cidade", null);
 		response = response(RestResponseStatus.FAIL, jsonResponse);
+		
+		return response;
+	}
+	
+	@POST
+	@Path("/recuperaDuasCidadesMaisDistantes")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response recuperaDuasCidadesMaisDistantes() {
+		Response response = null;
+		try {
+			CidadeAS cidadeAS = new CidadeAS();
+			Map<Double, CidadeEntity[]> mapCidadesMaisDistantes = cidadeAS.recuperaDuasCidadesMaisDistantes();
+			
+			if(mapCidadesMaisDistantes != null && mapCidadesMaisDistantes.size() > 0) {
+				JsonObject jsonResponse = new JsonObject();
+				JsonArray cidadesArr = new JsonArray();
+				for(Double umaDistancia : mapCidadesMaisDistantes.keySet()) {
+					cidadesArr.add(converteCidadeEmJsonObject(mapCidadesMaisDistantes.get(umaDistancia)[0]));
+					cidadesArr.add(converteCidadeEmJsonObject(mapCidadesMaisDistantes.get(umaDistancia)[1]));
+					jsonResponse.add("cidades", cidadesArr);
+					jsonResponse.add("distancia", parse(umaDistancia.toString()));
+				}
+			} else {
+				JsonObject jsonResponse = new JsonObject();
+				jsonResponse.add("cidades", null);
+				jsonResponse.add("distancia", null);
+				response = response(RestResponseStatus.FAIL, jsonResponse);
+			}
+		} catch (Exception e) {
+			response = tratarErro(e);
+		}
 		
 		return response;
 	}
@@ -420,8 +466,8 @@ public class CidadeService {
 	public static <T> T getValue(Object object, Class<T> clazz) throws ParseException {
 		if (object != null) {
 			if (Date.class.equals(clazz)) {
-				// return (T) DateUtils.parseString(object.toString()); TODO
-				// marcos
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+				return (T) sdf.format((Date) object);
 			} else if (Integer.class.equals(clazz)) {
 				return (T) Integer.valueOf(object.toString());
 			} else if (Long.class.equals(clazz)) {

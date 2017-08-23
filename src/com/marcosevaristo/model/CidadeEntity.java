@@ -32,15 +32,19 @@ import org.hibernate.annotations.NamedQuery;
     @NamedQuery(name="queryRecuperaQtdCidadesPorEstado",
     query=" select count(obj.ibge_id), obj.uf from CidadeEntity obj "
     		+ " group by obj.uf "),
-    @NamedQuery(name="queryRecuperaCidadePorID",
-    query=" select obj from CidadeEntity obj "
-    		+ " where obj.id = :id "),
+    
     @NamedQuery(name="queryRecuperaNomeCidadesPorEstado",
     query=" select obj.name from CidadeEntity obj "
     		+ " where obj.uf = :uf "),
     @NamedQuery(name="queryRecuperaCidadePorFiltroInformado",
     query=" select obj from CidadeEntity obj "
     		+ " where :campo like :valor "),
+    @NamedQuery(name="queryRecuperaDadosDaColuna",
+    query=" select distinct obj. :coluna from CidadeEntity obj "),
+    @NamedQuery(name="queryRecuperaQtdRegistrosTotais",
+    query=" select count(obj.ibge_id) from CidadeEntity obj "),
+    
+    
 }) 
 public class CidadeEntity implements Serializable{
 

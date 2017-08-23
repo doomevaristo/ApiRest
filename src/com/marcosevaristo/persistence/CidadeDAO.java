@@ -98,13 +98,23 @@ public class CidadeDAO extends ConnectionMarcos{
 		return lEstados;
 	}
 	
-	public CidadeEntity recuperaCidadePorID(Long id) {
-		Query query = getEntityManager().createNamedQuery("queryRecuperaCidadePorID", CidadeEntity.class);
-		query.setParameter("id", id);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List<CidadeEntity> recuperaCidadePorID(Long id) {
+		StringBuilder hql = new StringBuilder();
+		hql.append(" select obj from CidadeEntity obj ");
+		if(id != null) {
+			hql.append(" where obj.id = :id ");
+		}
 		
-		Object obj = query.getSingleResult();
-		if(obj != null) {
-			return (CidadeEntity) obj;
+		Query query = getEntityManager().createQuery(hql.toString());
+		
+		if(id != null) {
+			query.setParameter("id", id);
+		}
+		
+		List lResultados = query.getResultList();
+		if(CollectionUtils.isNotEmpty(lResultados)) {
+			return (List<CidadeEntity>) lResultados;
 		} else {
 			return null;
 		}
@@ -130,7 +140,7 @@ public class CidadeDAO extends ConnectionMarcos{
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<CidadeEntity> recuperaCidadesPorFiltroInformado(String campoStr, String valorStr) {
 		if(isCampoDaEntidade(campoStr, CidadeEntity.class)) {
 			List lResultados = null;
@@ -146,6 +156,28 @@ public class CidadeDAO extends ConnectionMarcos{
 			}
 		}
 		return null;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List<String> recuperaDadosDaColuna(String campoStr) {
+		if(isCampoDaEntidade(campoStr, CidadeEntity.class)) {
+			List lResultados = null;
+			Query query = getEntityManager().createNamedQuery("queryRecuperaDadosDaColuna", CidadeEntity.class);
+			
+			query.setParameter("campo", campoStr);
+			
+			lResultados = query.getResultList();
+			
+			if(CollectionUtils.isNotEmpty(lResultados)) {
+				return (List<String>) lResultados;
+			}
+		}
+		return null;
+	}
+	
+	public int recuperaQtdRegistrosTotais() {
+		Query query = getEntityManager().createNamedQuery("queryRecuperaQtdRegistrosTotais", CidadeEntity.class);
+		return (int) query.getSingleResult();
 	}
 	
 	private boolean isCampoDaEntidade(String campoStr, Class<?> clazz) {
