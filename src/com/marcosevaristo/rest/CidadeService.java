@@ -267,8 +267,9 @@ public class CidadeService {
 		Response response;
 		
 		try {
-			Long cidadeID = parseCidadeID(jsonStr);
+			JsonObject cidadeIdJson = (JsonObject) parse(jsonStr);
 			
+			Long cidadeID = getValue(cidadeIdJson, "ibge_id", Long.class);
 			if(cidadeID != null) {
 				CidadeDAO.getInstance().deletaCidade(cidadeID);
 				

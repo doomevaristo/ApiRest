@@ -29,10 +29,6 @@ import org.hibernate.annotations.NamedQuery;
     		+ " having count(obj.ibge_id) = (select min(count(obj.ibge_id)) "
     									+ "  from CidadeEntity obj"
     									+ "  group by obj.uf)"),
-    @NamedQuery(name="queryRecuperaQtdCidadesPorEstado",
-    query=" select count(obj.ibge_id), obj.uf from CidadeEntity obj "
-    		+ " group by obj.uf "),
-    
     @NamedQuery(name="queryRecuperaNomeCidadesPorEstado",
     query=" select obj.name from CidadeEntity obj "
     		+ " where obj.uf = :uf "),

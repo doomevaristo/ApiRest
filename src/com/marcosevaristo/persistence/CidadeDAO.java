@@ -96,13 +96,18 @@ public class CidadeDAO extends ConnectionMarcos{
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<EstadoDTO> recuperaQtdCidadesPorEstado() {
 		List<EstadoDTO> lEstados = new ArrayList<>();
-		Query query = getEntityManager().createNamedQuery("queryRecuperaQtdCidadesPorEstado", CidadeEntity.class);
+		
+		StringBuilder sbSql = new StringBuilder();
+		sbSql.append(" select count(obj.ibge_id), obj.uf from CidadeEntity obj ");
+		sbSql.append(" group by obj.uf ");
+		
+		Query query = getEntityManager().createQuery(sbSql.toString());
 		List lRetornos = query.getResultList();
 		
 		if(CollectionUtils.isNotEmpty(lRetornos)) {
 			List<Object[]> lRetornosObj = (List<Object[]>) lRetornos;
 			for(Object[] umObjArr : lRetornosObj) {
-				Integer qtdCidades = (Integer) umObjArr[0];
+				Long qtdCidades = (Long) umObjArr[0];
 				String sigla = (String) umObjArr[1];
 				lEstados.add(new EstadoDTO(sigla, qtdCidades));
 			}
