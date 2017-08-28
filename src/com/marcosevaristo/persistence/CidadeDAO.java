@@ -74,10 +74,25 @@ public class CidadeDAO extends ConnectionMarcos{
 		String siglaEstadoMaiorNroCidades;
 		String siglaEstadoMenorNroCidades;
 		
-		Query query = getEntityManager().createNamedQuery("queryRecuperaEstadoMaiorNroCidades", CidadeEntity.class);
+		StringBuilder sbSql = new StringBuilder();
+		sbSql.append("select obj.uf from CidadeEntity obj ");
+		sbSql.append(" group by obj.uf ");
+		sbSql.append(" having count(obj.ibge_id) = (select max(count(obj.ibge_id)) ");
+		sbSql.append(" from CidadeEntity obj");
+		sbSql.append("  group by obj.uf)");
+		
+		Query query = getEntityManager().createQuery(sbSql.toString());
 		siglaEstadoMaiorNroCidades = (String) query.getSingleResult();
 		
-		query = getEntityManager().createNamedQuery("queryRecuperaEstadoMenorNroCidades", CidadeEntity.class);
+		sbSql = new StringBuilder();
+		sbSql.append(" select obj.uf from CidadeEntity obj ");
+		sbSql.append(" group by obj.uf ");
+		sbSql.append(" having count(obj.ibge_id) = (select min(count(obj.ibge_id)) ");
+		sbSql.append("  from CidadeEntity obj ");
+		sbSql.append("  group by obj.uf)");
+		
+		
+		query = getEntityManager().createQuery(sbSql.toString());
 		siglaEstadoMenorNroCidades = (String) query.getSingleResult();
 		
 		EstadoDTO estadoDTO = new EstadoDTO();
@@ -140,7 +155,11 @@ public class CidadeDAO extends ConnectionMarcos{
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<String> recuperaNomeCidadesPorEstado(String estadoStr) {
-		Query query = getEntityManager().createNamedQuery("queryRecuperaNomeCidadesPorEstado", CidadeEntity.class);
+		StringBuilder sbSql = new StringBuilder();
+		sbSql.append(" select obj.name from CidadeEntity obj ");
+		sbSql.append(" where obj.uf = :uf ");
+		
+		Query query = getEntityManager().createQuery(sbSql.toString());
 		
 		if(StringUtils.isNotBlank(estadoStr)) {
 			if(estadoStr.length() == 2) { //Sigla
@@ -197,9 +216,12 @@ public class CidadeDAO extends ConnectionMarcos{
 		return null;
 	}
 	
-	public int recuperaQtdRegistrosTotais() {
-		Query query = getEntityManager().createNamedQuery("queryRecuperaQtdRegistrosTotais", CidadeEntity.class);
-		return (int) query.getSingleResult();
+	public Long recuperaQtdRegistrosTotais() {
+		StringBuilder sbSql = new StringBuilder();
+		sbSql.append(" select count(obj.ibge_id) from CidadeEntity obj ");
+		
+		Query query = getEntityManager().createQuery(sbSql.toString());
+		return (Long) query.getSingleResult();
 	}
 	
 	private boolean isCampoDaEntidade(String campoStr, Class<?> clazz) {

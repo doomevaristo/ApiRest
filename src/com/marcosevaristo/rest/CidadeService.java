@@ -162,7 +162,6 @@ public class CidadeService {
 		}
 			
 		return response;
-	
 	}
 	
 	@POST
@@ -394,6 +393,28 @@ public class CidadeService {
 			response = tratarErro(e);
 		}
 		
+		return response;
+	}
+	
+	@POST
+	@Path("/recuperaQtdRegistrosTotais")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response recuperaQtdRegistrosTotais() {
+		Response response = null;
+		try {		
+			Long qtdRegistrosTotais = CidadeDAO.getInstance().recuperaQtdRegistrosTotais();
+			
+			if(qtdRegistrosTotais != null) {
+				JsonObject jsonResponse = new JsonObject();
+				jsonResponse.addProperty("qtdTotal", qtdRegistrosTotais);
+				
+				response = response(RestResponseStatus.OK, jsonResponse);
+			}
+		} catch (Exception e) {
+			response = tratarErro(e);
+		}
+			
 		return response;
 	}
 	
