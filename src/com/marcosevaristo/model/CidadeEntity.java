@@ -19,7 +19,7 @@ import org.hibernate.annotations.NamedQuery;
                 	+ " order by obj.name desc "),
     @NamedQuery(name="queryRecuperaCidadePorFiltroInformado",
     query=" select obj from CidadeEntity obj "
-    		+ " where :campo like :valor "),
+    		+ " where obj.:campo like :valor "),
 }) 
 public class CidadeEntity implements Serializable{
 

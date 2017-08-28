@@ -184,7 +184,7 @@ public class CidadeDAO extends ConnectionMarcos{
 			Query query = getEntityManager().createNamedQuery("queryRecuperaCidadePorFiltroInformado", CidadeEntity.class);
 			
 			query.setParameter("campo", campoStr);
-			query.setParameter("valor", "%"+valorStr+"%");
+			query.setParameter("valor", valorStr);
 			
 			lResultados = query.getResultList();
 			
