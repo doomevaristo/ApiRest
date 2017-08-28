@@ -9,10 +9,8 @@
 
 		<shared-cache-mode>ALL</shared-cache-mode>
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://MARCOS-PC\\SQLEXPRESS;databaseName=CIDADES;" />
-			<property name="javax.persistence.jdbc.user" value="marcos" />
+			<property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://MARCOS-PC:1433;instance=SQLEXPRESS;databaseName=CIDADES;user=sa;password=123456" />
 			<property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-			<property name="javax.persistence.jdbc.password" value="123456" />
 
 			<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
             <property name="hibernate.generate_statistics" value="false"/>

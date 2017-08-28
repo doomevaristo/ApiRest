@@ -5,6 +5,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import net.sf.ehcache.CacheManager;
+
+
 public class ConnectionMarcos {
 	
 	private final String DATABASE_NAME = "CIDADES";
@@ -15,6 +18,7 @@ public class ConnectionMarcos {
 		if(entityManager == null) {
 			entityManagerFactory = Persistence.createEntityManagerFactory(DATABASE_NAME);
 			entityManager = entityManagerFactory.createEntityManager();
+			CacheManager.create();
 		}
 		return entityManager;
 	}
@@ -28,14 +32,12 @@ public class ConnectionMarcos {
 		}
 	}
 	
-	protected void beginTransaction() {
-		if(entityManager != null && entityManager.isOpen()) {
-			entityManager.getTransaction().begin();
+	protected void getTransaction() {
+		if(entityManager != null) {
 		} else {
-			entityManagerFactory = Persistence.createEntityManagerFactory(DATABASE_NAME);
-			entityManager = entityManagerFactory.createEntityManager();
-			entityManager.getTransaction().begin();
+			entityManager = getEntityManager();
 		}
+		entityManager.getTransaction();
 	}
 	
 	protected void persist(Object objeto) {
@@ -46,9 +48,19 @@ public class ConnectionMarcos {
 		}
 	}
 	
+	protected void delete(Object objeto) {
+		if(entityManager.isOpen() && entityManager.getTransaction().isActive()) {
+			entityManager.remove(objeto);
+		} else {
+			System.out.println(MensagemUtils.ENTITY_MANAGER_FECHADO_OU_TRANSACAO_INATIVA);
+		}
+	}
+	
 	protected void commit() {
 		if(entityManager.isOpen() && entityManager.getTransaction().isActive()) {
 			entityManager.getTransaction().commit();
+			entityManager.flush();
+			close();
 		} else {
 			System.out.println(MensagemUtils.ENTITY_MANAGER_FECHADO_OU_TRANSACAO_INATIVA);
 		}

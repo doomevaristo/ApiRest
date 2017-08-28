@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 
 import com.marcosevaristo.helper.EstadoHelper;
@@ -26,23 +27,35 @@ public class CidadeDAO extends ConnectionMarcos{
 
 	public void populaBaseCidades(List<CidadeEntity> lCidades) {
 		if(CollectionUtils.isNotEmpty(lCidades)) {
-			beginTransaction();
+			EntityTransaction tran = getEntityManager().getTransaction();
 			for(CidadeEntity umaCidade : lCidades) {
+				tran.begin();
 				persist(umaCidade);
+				tran.commit();
 			}
-			close();
 		}
 	}
 	
 	public void insereCidade(CidadeEntity cidade) {
 		if(cidade != null) {
-			beginTransaction();
+			EntityTransaction tran = getEntityManager().getTransaction();
+			tran.begin();
 			persist(cidade);
-			close();
+			tran.commit();
 		}
 	}
 	
-	public void deletaCidade(CidadeEntity cidade) {
+	public void deletaCidade(Long cidadeID) {
+		List<CidadeEntity> lCidades = recuperaCidadePorID(cidadeID);
+		if(CollectionUtils.isNotEmpty(lCidades)) {
+			CidadeEntity cidadeExcluir = lCidades.get(0);
+			if(cidadeExcluir != null) {
+				EntityTransaction tran = getEntityManager().getTransaction();
+				tran.begin();
+				delete(cidadeExcluir);
+				tran.commit();
+			}
+		}
 		
 	}
 	
@@ -162,9 +175,13 @@ public class CidadeDAO extends ConnectionMarcos{
 	public List<String> recuperaDadosDaColuna(String campoStr) {
 		if(isCampoDaEntidade(campoStr, CidadeEntity.class)) {
 			List lResultados = null;
-			Query query = getEntityManager().createNamedQuery("queryRecuperaDadosDaColuna", CidadeEntity.class);
+			StringBuilder sbSql = new StringBuilder();
+			sbSql.append("select distinct obj.");
+			sbSql.append(":coluna");
+			sbSql.append(" from CidadeEntity obj ");
 			
-			query.setParameter("campo", campoStr);
+			Query query = createQuery(sbSql.toString());
+			query.setParameter("coluna", campoStr);
 			
 			lResultados = query.getResultList();
 			

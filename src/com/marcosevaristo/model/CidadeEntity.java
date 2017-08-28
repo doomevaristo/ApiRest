@@ -39,8 +39,6 @@ import org.hibernate.annotations.NamedQuery;
     @NamedQuery(name="queryRecuperaCidadePorFiltroInformado",
     query=" select obj from CidadeEntity obj "
     		+ " where :campo like :valor "),
-    @NamedQuery(name="queryRecuperaDadosDaColuna",
-    query=" select distinct obj. :coluna from CidadeEntity obj "),
     @NamedQuery(name="queryRecuperaQtdRegistrosTotais",
     query=" select count(obj.ibge_id) from CidadeEntity obj "),
     

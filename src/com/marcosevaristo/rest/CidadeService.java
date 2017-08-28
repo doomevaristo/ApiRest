@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +29,7 @@ import com.marcosevaristo.model.CidadeEntity;
 import com.marcosevaristo.model.dto.EstadoDTO;
 import com.marcosevaristo.persistence.CidadeDAO;
 import com.marcosevaristo.util.CollectionUtils;
+import com.marcosevaristo.util.MensagemUtils;
 import com.marcosevaristo.util.StringUtils;
 
 @Path("/")
@@ -55,23 +55,7 @@ public class CidadeService {
 			cidadeDAO.populaBaseCidades(lCidades);
 			
 			JsonObject jsonResponse = new JsonObject();
-			
-			JsonArray cidades = new JsonArray();
-			
-			JsonObject pomerode = new JsonObject();
-			pomerode.addProperty("id", 1);
-			pomerode.addProperty("nome", "Pomerode");
-			pomerode.addProperty("estado", "SC");
-			cidades.add(pomerode);
-			
-			JsonObject blumenau = new JsonObject();
-			blumenau.addProperty("id", 2);
-			blumenau.addProperty("nome", "Blumenau");
-			blumenau.addProperty("estado", "SC");
-			cidades.add(blumenau);
-			
-			jsonResponse.add("cidades", cidades);
-			jsonResponse.addProperty("token", UUID.randomUUID().toString());
+			jsonResponse.addProperty("mensagem", "sucesso");
 			
 			response = response(RestResponseStatus.OK, jsonResponse);
 		} catch (Exception e) {
@@ -276,6 +260,34 @@ public class CidadeService {
 	}
 	
 	@POST
+	@Path("/deletaCidade")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deletaCidade(String jsonStr) {
+		Response response;
+		
+		try {
+			Long cidadeID = parseCidadeID(jsonStr);
+			
+			if(cidadeID != null) {
+				CidadeDAO.getInstance().deletaCidade(cidadeID);
+				
+				JsonObject jsonResponse = new JsonObject();
+				jsonResponse.addProperty("message", MensagemUtils.CIDADE_DELETADA);
+				response = response(RestResponseStatus.OK, jsonResponse);
+			} else {
+				JsonObject jsonResponse = new JsonObject();
+				jsonResponse.addProperty("message", MensagemUtils.ERRO_GENERICO);
+				response = response(RestResponseStatus.FAIL, jsonResponse);
+			}
+		} catch (Exception e) {
+			response = tratarErro(e);
+		}
+			
+		return response;
+	}
+	
+	@POST
 	@Path("/filtraCidade")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -446,7 +458,11 @@ public class CidadeService {
 	public static CidadeEntity parseCidade(String jsonStr) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(jsonStr, CidadeEntity.class);
-		
+	}
+	
+	public static Long parseCidadeID(String jsonStr) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(jsonStr, Long.class);
 	}
 
 	public static <T> T getValue(JsonObject jsonObject, String key, Class<T> clazz) throws ParseException {
